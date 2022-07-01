@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 import neat
+import numpy as np
 import os
 import pickle
 import pygame
 import sys
 import time
+import matplotlib.pyplot as plt
 
 from random import randrange
 from typing import List, Tuple
+
 
 pygame.font.init()
 pygame.mixer.init(buffer=512)
@@ -167,7 +170,7 @@ class Game:
 
             data = (du, dd, dl, dr, food.position[0] - head[0], food.position[1] - head[1], dx, dy)
 
-            #Check for next move
+            #Check for next move (NEAT network)
             output = net.activate(data)
 
             if not fast_mode:
@@ -200,6 +203,7 @@ class Game:
 
 
 def fitness(genomes, config):
+    #best_fit = 0
     for _, genome in genomes:
         net = neat.nn.FeedForwardNetwork.create(genome, config)
         if not genome.fitness:
@@ -207,6 +211,17 @@ def fitness(genomes, config):
 
         game = Game((800, 600), (40, 30), (5, 5))
         genome.fitness += game.play(net)
+
+
+    #    if (best_fit<genome.fitness):
+    #        best_fit = genome.fitness
+    #gen = gen + 1
+    #gen_list.append(gen)
+    #best_fit_list.append(best_fit)
+    #plt.scatter(gen_list, best_fit_list)
+    #print(gen_list)
+    #print(best_fit_list)
+
 
 
 def save_population(population):
@@ -222,6 +237,9 @@ def load_population(file_name):
 def run(config_path, population):
     config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path)
 
+    global best_fit_list
+    global generation
+
     #If population parametr is not set, then take form config
     if not population:
         population = neat.Population(config)
@@ -230,14 +248,19 @@ def run(config_path, population):
     stats = neat.StatisticsReporter()
     population.add_reporter(stats)
 
-    population.run(fitness, 1000)
+
+    population.run(fitness, 5)
     save_population(population)
 
 
+#gen = 0
+#gen_list = []
+#best_fit_list = []
+
 if __name__ == '__main__':
+
     local_dir = os.path.dirname(__file__)
     config_path = os.path.join(local_dir, 'config.txt')
-
 
     population = None
     if len(sys.argv) > 1:
