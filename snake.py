@@ -250,7 +250,7 @@ def run(config_path, population):
     population.add_reporter(stats)
 
 
-    population.run(fitness, 25)
+    population.run(fitness, 1000)
     save_population(population)
     global gen_list
     global best_fit_list
