@@ -12,6 +12,9 @@ import matplotlib.pyplot as plt
 from random import randrange
 from typing import List, Tuple
 
+gen = 0
+gen_list = []
+best_fit_list = []
 
 pygame.font.init()
 pygame.mixer.init(buffer=512)
@@ -90,8 +93,6 @@ class Game:
     POINTS_FONT = pygame.font.SysFont('fsdfds', 30)
     POINTS_COLOR = (191, 141, 65)
 
-    #EAT_SOUND = pygame.mixer.Sound(os.path.join('sounds', 'coin.wav'))
-    #DIE_SOUND = pygame.mixer.Sound(os.path.join('sounds', 'bump.wav'))
 
     def __init__(self, window_size: Tuple[int, int], board_size: Tuple[int, int], start_position: Tuple[int, int]):
         self.window = pygame.display.set_mode(window_size)
@@ -187,13 +188,10 @@ class Game:
 
             #Death by wall or self
             if head not in self.board or head in tail:
-                #self.DIE_SOUND.play()
-                #time.sleep(1)
                 return points
 
             #Obtaining Food
             if head == food.position:
-                #self.EAT_SOUND.play()
                 points += 1
                 snake.extend += 1
                 food = Food.random(self.board)
@@ -203,7 +201,10 @@ class Game:
 
 
 def fitness(genomes, config):
-    #best_fit = 0
+    global gen
+    best_fit = 0
+
+
     for _, genome in genomes:
         net = neat.nn.FeedForwardNetwork.create(genome, config)
         if not genome.fitness:
@@ -213,14 +214,14 @@ def fitness(genomes, config):
         genome.fitness += game.play(net)
 
 
-    #    if (best_fit<genome.fitness):
-    #        best_fit = genome.fitness
-    #gen = gen + 1
-    #gen_list.append(gen)
-    #best_fit_list.append(best_fit)
-    #plt.scatter(gen_list, best_fit_list)
-    #print(gen_list)
-    #print(best_fit_list)
+        if (best_fit<genome.fitness):
+            best_fit = genome.fitness
+    gen = gen + 1
+    gen_list.append(gen)
+    best_fit_list.append(best_fit)
+    plt.scatter(gen_list, best_fit_list)
+    print(gen_list)
+    print(best_fit_list)
 
 
 
@@ -249,13 +250,16 @@ def run(config_path, population):
     population.add_reporter(stats)
 
 
-    population.run(fitness, 5)
+    population.run(fitness, 25)
     save_population(population)
+    global gen_list
+    global best_fit_list
+
+    plt.plot(gen_list, best_fit_list)
+    plt.show()
 
 
-#gen = 0
-#gen_list = []
-#best_fit_list = []
+
 
 if __name__ == '__main__':
 
